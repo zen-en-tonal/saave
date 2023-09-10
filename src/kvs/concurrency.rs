@@ -65,21 +65,30 @@ impl<K: 'static, V: 'static> Handle<K, V> {
     pub async fn get(&self, key: K) -> Result<Option<V>> {
         let (tx, rx) = oneshot::channel::<Result<Option<V>>>();
         let command = Command::Get((key, tx));
-        self.tx.send(command).await.map_err(|_| KvsError)?;
-        rx.await.map_err(|_| KvsError)?
+        self.tx
+            .send(command)
+            .await
+            .map_err(|e| KvsError::Other(e.to_string()))?;
+        rx.await.map_err(|e| KvsError::Other(e.to_string()))?
     }
 
     pub async fn insert(&self, key: K, value: V) -> Result<Option<V>> {
         let (tx, rx) = oneshot::channel::<Result<Option<V>>>();
         let command = Command::Insert((key, value, tx));
-        self.tx.send(command).await.map_err(|_| KvsError)?;
-        rx.await.map_err(|_| KvsError)?
+        self.tx
+            .send(command)
+            .await
+            .map_err(|e| KvsError::Other(e.to_string()))?;
+        rx.await.map_err(|e| KvsError::Other(e.to_string()))?
     }
 
     pub async fn remove(&self, key: K) -> Result<Option<V>> {
         let (tx, rx) = oneshot::channel::<Result<Option<V>>>();
         let command = Command::Remove((key, tx));
-        self.tx.send(command).await.map_err(|_| KvsError)?;
-        rx.await.map_err(|_| KvsError)?
+        self.tx
+            .send(command)
+            .await
+            .map_err(|e| KvsError::Other(e.to_string()))?;
+        rx.await.map_err(|e| KvsError::Other(e.to_string()))?
     }
 }

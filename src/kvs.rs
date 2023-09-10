@@ -2,7 +2,7 @@ pub mod compression;
 pub mod concurrency;
 pub mod sled;
 
-use std::result;
+use std::{error::Error, fmt::Display, result};
 
 pub use bytes::Bytes;
 
@@ -14,4 +14,26 @@ pub trait Kvs {
     fn remove(&mut self, key: &impl AsRef<str>) -> Result<Option<Bytes>>;
 }
 
-pub struct KvsError;
+#[derive(Debug)]
+pub enum KvsError {
+    Io(std::io::Error),
+    Other(String),
+}
+
+impl Display for KvsError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let letter = match self {
+            KvsError::Io(e) => format!("io error; {}", e),
+            KvsError::Other(e) => format!("other error; {}", e),
+        };
+        write!(f, "{letter}")
+    }
+}
+
+impl Error for KvsError {}
+
+impl From<std::io::Error> for KvsError {
+    fn from(value: std::io::Error) -> Self {
+        KvsError::Io(value)
+    }
+}

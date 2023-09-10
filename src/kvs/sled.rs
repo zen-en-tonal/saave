@@ -6,7 +6,7 @@ impl Kvs for sled::Tree {
     fn get(&self, key: &impl AsRef<str>) -> super::Result<Option<bytes::Bytes>> {
         match self.get(key.as_ref()) {
             Ok(option) => Ok(option.map(|some| Bytes::copy_from_slice(some.as_ref()))),
-            Err(_) => Err(super::KvsError),
+            Err(e) => Err(super::KvsError::Other(e.to_string())),
         }
     }
 
@@ -15,18 +15,16 @@ impl Kvs for sled::Tree {
         key: impl AsRef<str>,
         value: bytes::Bytes,
     ) -> super::Result<Option<bytes::Bytes>> {
-        let res = match sled::Tree::insert(&self, key.as_ref(), value.to_vec()) {
+        match sled::Tree::insert(&self, key.as_ref(), value.to_vec()) {
             Ok(option) => Ok(option.map(|some| Bytes::copy_from_slice(some.as_ref()))),
-            Err(_) => Err(super::KvsError),
-        };
-        res
+            Err(e) => Err(super::KvsError::Other(e.to_string())),
+        }
     }
 
     fn remove(&mut self, key: &impl AsRef<str>) -> super::Result<Option<bytes::Bytes>> {
-        let res = match sled::Tree::remove(&self, key.as_ref()) {
+        match sled::Tree::remove(&self, key.as_ref()) {
             Ok(option) => Ok(option.map(|some| Bytes::copy_from_slice(some.as_ref()))),
-            Err(_) => Err(super::KvsError),
-        };
-        res
+            Err(e) => Err(super::KvsError::Other(e.to_string())),
+        }
     }
 }

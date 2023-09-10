@@ -47,7 +47,8 @@ fn convert_into_webp<T: Read, Q: Write>(mut data: T, dest: &mut Q) -> io::Result
         .with_guessed_format()?
         .decode()
         .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
-    let encoder = webp::Encoder::from_image(&image).unwrap();
+    let encoder = webp::Encoder::from_image(&image)
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
     let binding = encoder.encode(65f32);
     std::io::copy(&mut binding.reader(), dest)?;
     Ok(())
